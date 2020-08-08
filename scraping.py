@@ -1,13 +1,14 @@
 # Import Splinter, BeautifulSoup, and Pandas
 from splinter import Browser
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup as soup
 import pandas as pd
 import datetime as dt
 
 
 def scrape_all():
     # Initiate headless driver for deployment
-    browser = Browser("chrome", executable_path="chromedriver", headless=True)
+    executable_path = {'executable_path': 'chromedriver'}
+    browser = Browser('chrome', **executable_path, headless=True)
 
     news_title, news_paragraph = mars_news(browser)
 
@@ -90,13 +91,13 @@ def mars_facts():
     # Add try/except for error handling
     try:
         # Use 'read_html' to scrape the facts table into a dataframe
-        df = pd.read_html('http://space-facts.com/mars/')[0]
+        df = pd.read_html('http://space-facts.com/mars/')[1]
 
     except BaseException:
         return None
 
     # Assign columns and set index of dataframe
-    df.columns = ['Description', 'Mars']
+    df.columns = ['Description', 'Mars', 'Earth']
     df.set_index('Description', inplace=True)
 
     # Convert dataframe into HTML format, add bootstrap
