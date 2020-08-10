@@ -3,6 +3,7 @@ from splinter import Browser
 from bs4 import BeautifulSoup as soup
 import pandas as pd
 import datetime as dt
+import requests
 
 
 def scrape_all():
@@ -18,6 +19,7 @@ def scrape_all():
         "news_paragraph": news_paragraph,
         "featured_image": featured_image(browser),
         "facts": mars_facts(),
+        "mars_images": mars_images(browser),
         "last_modified": dt.datetime.now()
     }
 
@@ -102,6 +104,29 @@ def mars_facts():
 
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html(classes="table table-striped")
+
+
+def mars_hemispheres(html_text):
+    mars_soup = soup(html_text, "html.parser")
+    try:
+        title = mars_soup.find("h2", class_="title").get_text()
+        sample = mars_soup.find("a", text="Sample").get("href")
+    except AttributeError:
+        title, sample = None, None
+    return {"title": title, "img_url": sample}
+
+
+def mars_images(browser):
+    # Visit hemispheres website through splinter module
+    four_hemisphere_url = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
+    browser.visit(four_hemisphere_url)
+    hemisphere_image_urls = []
+    for i in range(4):
+        browser.find_by_css("a.product-item h3")[i].click()
+        hemi_data = mars_hemispheres(browser.html)
+        hemisphere_image_urls.append(hemi_data)
+        browser.back()
+    return hemisphere_image_urls
 
 
 if __name__ == "__main__":
